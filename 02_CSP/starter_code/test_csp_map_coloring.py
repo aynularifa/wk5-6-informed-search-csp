@@ -17,7 +17,13 @@ For each test case, write a short comment explaining WHICH category from
 the mind-map it represents and WHY you chose it.
 """
 import pytest
-from csp_map_coloring import backtracking_search, is_consistent
+from csp_map_coloring import (
+    VARIABLES,
+    NEIGHBOURS,
+    DOMAIN,
+    backtracking_search,
+    is_consistent,
+)
 
 
 def _is_valid_solution(solution, variables, neighbours):
@@ -41,11 +47,6 @@ def _is_valid_solution(solution, variables, neighbours):
 # "Solvability -> solvable case").
 # ---------------------------------------------------------------------
 def test_given_example():
-    # backtracking_search() in this starter file is wired to the fixed
-    # Australia map problem (VARIABLES / NEIGHBOURS / DOMAIN, all module
-    # level in csp_map_coloring.py), so this test solves that real problem.
-    from csp_map_coloring import VARIABLES, NEIGHBOURS, DOMAIN
-
     solution = backtracking_search(VARIABLES, DOMAIN)
 
     assert solution is not None
@@ -54,26 +55,47 @@ def test_given_example():
 
 # ---------------------------------------------------------------------
 # TODO Test Case 1
-# Which mind-map category does this represent? (edit this comment)
+# Mind-map Category: Graph Topology & Solution Validity -> Full Constraint Verification
+# Why: Verifies that every single adjacent pair of regions in the solved map
+# strictly receives different colors.
 # ---------------------------------------------------------------------
 def test_case_1():
-    raise NotImplementedError("TODO: design and implement test case 1")
+    solution = backtracking_search(VARIABLES, DOMAIN)
+    assert solution is not None
+    
+    # Explicitly check every neighbor relationship in Australia map
+    for var in VARIABLES:
+        for neighbour in NEIGHBOURS[var]:
+            assert solution[var] != solution[neighbour]
 
 
 # ---------------------------------------------------------------------
 # TODO Test Case 2
-# Which mind-map category does this represent? (edit this comment)
+# Mind-map Category: Domain & Solvability -> Unsolvable / Over-constrained Case
+# Why: Restricting the available domain to only 2 colors makes coloring 
+# Australia impossible (it chromatic number is 3), testing solver failure handling.
 # ---------------------------------------------------------------------
 def test_case_2():
-    raise NotImplementedError("TODO: design and implement test case 2")
+    restricted_domain = ["Red", "Green"]
+    solution = backtracking_search(VARIABLES, restricted_domain)
+    assert solution is None
 
 
 # ---------------------------------------------------------------------
 # TODO Test Case 3
-# Which mind-map category does this represent? (edit this comment)
+# Mind-map Category: Edge Cases -> Unconstrained / Disconnected Nodes
+# Why: Tests handling of isolated graph nodes like Tasmania ('T'), ensuring it 
+# receives a valid color and can be freely reassigned without causing conflicts.
 # ---------------------------------------------------------------------
 def test_case_3():
-    raise NotImplementedError("TODO: design and implement test case 3")
+    solution = backtracking_search(VARIABLES, DOMAIN)
+    assert solution is not None
+    assert solution["T"] in DOMAIN
+    
+    # Tasmania has no neighbors, changing its color must remain consistent
+    test_assignment = solution.copy()
+    test_assignment["T"] = "Blue"
+    assert is_consistent(test_assignment, "T", "Blue")
 
 
 if __name__ == "__main__":
